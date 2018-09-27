@@ -1,0 +1,129 @@
+---
+title: "Billboard Top 100 Analysis 1965-2015"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: spacelab
+    orientation: rows
+    vertical_layout: fill
+---
+This dataset is called [Billboard 1964 – 2015 Songs and Lyrics](https://www.kaggle.com/rakannimer/billboard-lyrics). The Billboard 100 ranks relevant music of the time based on radio plays, streams, and other measurements that ultimately tell how popular a song is at any given time. This data is comprised of the year’s end data for the last 50 years. The final chart is calculated using an inverse point system based on the weekly Billboard charts (100 points for a week at number one, 1 point for a week at 100). This allows for an overall score to be complied to see what artists have really left their mark on that respective year and over the last 50 years. My purpose here is too
+see the artist with largest impact over the last 50 years along with the evolution of the songs along the way.
+```{r setup, include=FALSE}
+library(flexdashboard)
+#Setting up workspace
+suppressWarnings(library(stringr))
+suppressWarnings(library(stringi))
+suppressWarnings(library(ggplot2))
+suppressWarnings(library(sqldf))
+suppressWarnings(library(dplyr))
+suppressWarnings(library(tidyr))
+suppressWarnings(library(plotly))
+
+#read in data
+dataset = read.csv('billboard_lyrics_1964-2015.csv')
+str(dataset)
+head(dataset)
+
+#data cleansing and exploration
+na_count <- colSums(is.na(dataset))
+na_count <- data.frame(na_count)
+na_count
+
+#clear NAs as they are in the lyrics column therefore not useful for our analysis
+df<-na.omit(dataset)
+
+#To use stringi to measure the length of the songs, we need to make sure our 
+#string data is in character format
+df$Lyrics<-as.character(df$Lyrics)
+df$Artist<-as.character(df$Artist)
+df$Song<-as.character(df$Song)
+
+#getting song length for by year aggregation
+df$song_length <- stri_length(df$Lyrics)
+
+#We first want to clean the data to have just the 
+#main artists in the artists column
+df$Artist <- str_split_fixed(df$Artist, "featuring", 1)
+#Lets look at what artists show up the most
+df$Artist<-as.factor(df$Artist)
+top_artists <- data.frame(table(df$Artist))
+colnames(top_artists) <- c('Artist', 'Appearances')
+top_artists$Appearances<- as.numeric(top_artists$Appearances)
+top_artists <- top_artists[order(-top_artists$Appearances),]
+
+#create dataframe with top 20 artists based on Billboard apperances
+top_20 <- data.frame(top_artists[1:20, ])
+colnames(top_20) <- c('Artist', 'Appearances')
+top_20$Artist <- as.character(top_20$Artist)
+top_20$Artist <- factor(top_20$Artist, levels=unique(top_20$Artist))
+#lets look at the top ten songs over the last 50 years
+query <- "select * from df where Rank >=1 and Rank <=10"
+top_10 <- sqldf(query)
+
+#lets look at who has been in the top 10 most over the last 50 years
+top_10$Artist<-as.factor(top_10$Artist)
+top_10_artists <- data.frame(table(top_10$Artist))
+colnames(top_10_artists) <- c('Artist', 'Appearances')
+top_10_artists$Appearances<- as.numeric(top_10_artists$Appearances)
+top_10_artists <- top_10_artists[order(-top_10_artists$Appearances),]
+top_10_artists <- top_10_artists[1:10, ]
+top_10_artists$Artist <- as.character(top_10_artists$Artist)
+top_10_artists$Artist <- factor(top_10_artists$Artist, levels=unique(top_10_artists$Artist))
+#using sqldf to aggregate data 
+query <- "select year, avg(song_length) as avg_song_length from df group by year"
+song_length <- sqldf(query)
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Let's look at song length over the years.
+
+```{r}
+#plot results in time series
+library(plotly)
+plot <- ggplot()+
+  geom_line(data=song_length, aes(x=Year, y=avg_song_length),color='blue')+
+  geom_point(data=song_length, aes(x=Year, y=avg_song_length),color='red')+
+  ggtitle("Average Song Length 1965-2015 (Count by Indiviual Letters)")+
+  xlab("Year")+
+  ylab("Char. Count")
+plot
+p1 <- ggplotly(plot)
+p1
+```
+
+Row
+-----------------------------------------------------------------------
+
+### All I Want For Chirstmas Is Top 10 Songs!
+
+```{r}
+#lets look at the top artists with the most top ten appearances over the years
+#We can now plot the top 20 artists with the most apperances on the Billboard Top 100
+plot <- ggplot(data=top_10_artists, aes(x=Artist, y=Appearances, fill=Appearances))+
+  geom_bar(stat='identity')+
+  xlab('Apperances On The Billboard Top 100')+
+  ylab('Artists')+
+  ggtitle('Top 10 Artists With The Most Top Ten Billboard Songs')+
+  coord_flip()
+plot
+p4 <- ggplotly(plot)
+p4
+```
+
+### Madonna has left her mark on the music industry.
+
+```{r}
+ #We can now plot the top 20 artists with the most apperances on the Billboard Top 100
+plot <- ggplot(data=top_20, aes(x=Artist, y=Appearances, fill=Appearances))+
+  geom_bar(stat='identity')+
+  xlab('Apperances On The Billboard Top 100')+
+  ylab('Artists')+
+  ggtitle('Top 20 Artists With The Most Billboard Top 100 Songs')+
+  coord_flip()
+plot
+p3 <- ggplotly(plot)
+p3
+```
+

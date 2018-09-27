@@ -1,0 +1,11 @@
+---
+title: "Welcome!"
+---
+
+#Purpose
+This site is aimed to dsiplay my projects in a manner that is easily accessible along with being relatively presentable. This site was created using the very accessible and easy-to-use mixture of github and rmarkdown.
+
+#Topics
+I will be covering a wide range of topics here, ranging from sports to financial markets. There should be a little something for everyone. Data visualization, exploratory data analysis, machiene learning, and deep learning will eventually all be discussed and applied through this website.
+
+Cheers!
