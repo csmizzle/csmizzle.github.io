@@ -1,0 +1,14 @@
+name: "my-website"
+navbar:
+  title: "My Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "Billboard Top 100 Analysis"
+      href: songs_dash.html
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
