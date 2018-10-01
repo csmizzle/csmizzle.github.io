@@ -2,7 +2,6 @@
 title: "Billboard Top 100 Analysis 1965-2015"
 output: 
   flexdashboard::flex_dashboard:
-    theme: spacelab
     orientation: rows
     vertical_layout: fill
 ---
