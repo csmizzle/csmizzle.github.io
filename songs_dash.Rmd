@@ -69,6 +69,7 @@ top_10_artists <- top_10_artists[order(-top_10_artists$Appearances),]
 top_10_artists <- top_10_artists[1:10, ]
 top_10_artists$Artist <- as.character(top_10_artists$Artist)
 top_10_artists$Artist <- factor(top_10_artists$Artist, levels=unique(top_10_artists$Artist))
+
 #using sqldf to aggregate data 
 query <- "select year, avg(song_length) as avg_song_length from df group by year"
 song_length <- sqldf(query)
@@ -103,7 +104,7 @@ Row
 #We can now plot the top 20 artists with the most apperances on the Billboard Top 100
 plot <- ggplot(data=top_10_artists, aes(x=Artist, y=Appearances, fill=Appearances))+
   geom_bar(stat='identity')+
-  xlab('Apperances On The Billboard Top 100')+
+  xlab('Apperances On The Top 100')+
   ylab('Artists')+
   ggtitle('Top 10 Artists With The Most Top Ten Billboard Songs')+
   coord_flip()
@@ -118,7 +119,7 @@ p4
  #We can now plot the top 20 artists with the most apperances on the Billboard Top 100
 plot <- ggplot(data=top_20, aes(x=Artist, y=Appearances, fill=Appearances))+
   geom_bar(stat='identity')+
-  xlab('Apperances On The Billboard Top 100')+
+  xlab('Apperances On The Top 10')+
   ylab('Artists')+
   ggtitle('Top 20 Artists With The Most Billboard Top 100 Songs')+
   coord_flip()
